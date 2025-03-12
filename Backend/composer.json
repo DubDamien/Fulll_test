@@ -5,6 +5,7 @@
         }
     },
     "require": {
-        "behat/behat": "^3.19"
+        "behat/behat": "^3.19",
+        "symfony/console": "^7.2"
     }
 }
