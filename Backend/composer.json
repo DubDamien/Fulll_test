@@ -1,0 +1,10 @@
+{
+    "autoload": {
+        "psr-4": {
+            "Fulll\\": "src/"
+        }
+    },
+    "require": {
+        "behat/behat": "^3.19"
+    }
+}
