@@ -9,11 +9,11 @@ class ParkVehicleCommand {
     private $plateNumber;
     private Location $location;
 
-    public function __construct(string $fleetId, string $plateNumber, float $lat, float $long, ?float $alt) 
+    public function __construct(string $fleetId, string $plateNumber, float $lat, float $lng, ?float $alt) 
     {
         $this->fleetId = $fleetId;
         $this->plateNumber = $plateNumber;
-        $this->location = new Location($lat, $long, $alt);
+        $this->location = new Location($lat, $lng, $alt);
     }
 
     public function getFleetId(): string

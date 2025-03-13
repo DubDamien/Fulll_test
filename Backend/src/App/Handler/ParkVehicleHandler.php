@@ -3,22 +3,48 @@
 namespace Fulll\App\Handler;
 
 use Fulll\App\Command\ParkVehicleCommand;
-use Fulll\Infra\Repository\FleetRepository;
+use Fulll\Infra\Repository\LocationRepository;
+use Fulll\Infra\Repository\VehicleRepository;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class ParkVehicleHandler {
-    private FleetRepository $fleetRepository;
+    private LocationRepository $locationRepository;
+    private VehicleRepository $vehicleRepository;
+    private OutputInterface $output;
 
-    public function __construct(FleetRepository $fleetRepository) 
+    public function __construct(LocationRepository $locationRepository,VehicleRepository $vehicleRepository, OutputInterface $output)
     {
-        $this->fleetRepository = $fleetRepository;
+        $this->locationRepository = $locationRepository;
+        $this->vehicleRepository = $vehicleRepository;
+        $this->output = $output;
     }
 
     public function handle(ParkVehicleCommand $command): void
     {
-        $fleet = $this->fleetRepository->findById($command->getFleetId());
-        $vehicle = $fleet->getVehicleByPlateNumber($command->getPlateNumber());
+        $vehicle = $this->vehicleRepository->findByPlateNumber($command->getPlateNumber());
+        $commandLocation = $command->getLocation();
 
-        $vehicle->parkVehicle($command->getLocation());
-        $this->fleetRepository->save($fleet);
+        if ($vehicle->getLocation() && $vehicle->getLocation()->sameThanPreviousLocation($commandLocation)) {
+            $this->output->writeln(sprintf(
+                '<error>Vehicle with plate number %s is already parked at this location: Lat %s, Lng %s, Alt %s</error>',
+                $command->getPlateNumber(),
+                $commandLocation->getLat(),
+                $commandLocation->getLng(),
+                $commandLocation->getAlt() ?? 'N/A'
+            ));
+            return;
+        }
+
+        $location = $this->locationRepository->create($commandLocation->getLat(), $commandLocation->getLng(), $commandLocation->Getalt());
+
+        $this->vehicleRepository->updateLocation($vehicle->getId(), $location->getId());
+
+        $this->output->writeln(sprintf(
+            '<info>Vehicle with plate number %s parked at location: Lat %s, Lng %s, Alt %s</info>',
+            $command->getPlateNumber(),
+            $location->getLat(),
+            $location->getLng(),
+            $location->getAlt() ?? 'N/A'
+            ));    
     }
 }

@@ -6,6 +6,7 @@
     },
     "require": {
         "behat/behat": "^3.19",
-        "symfony/console": "^7.2"
+        "symfony/console": "^7.2",
+        "symfony/dotenv": "^7.2"
     }
 }

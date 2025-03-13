@@ -3,35 +3,44 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
+use Fulll\App\Handler\CreateFleetHandler;
 use Fulll\App\Handler\ParkVehicleHandler;
 use Fulll\App\Handler\RegisterVehicleHandler;
+use Fulll\App\Command\CreateFleetCommand;
 use Fulll\App\Command\ParkVehicleCommand;
 use Fulll\App\Command\RegisterVehicleCommand;
-use Fulll\Domain\Entity\Fleet;
 use Fulll\Infra\Repository\FleetRepository;
+use Fulll\Infra\Repository\LocationRepository;
+use Fulll\Infra\Repository\VehicleRepository;
+use Fulll\Infra\Config\Config;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+
+Config::load(__DIR__ . '/../.env');
 
 $application = new Application();
 
 $fleetRepository = new FleetRepository();
+$vehicleRepository = new VehicleRepository();
+$locationRepository = new LocationRepository();
 
 $application->register('create')
     ->addArgument('userId', InputArgument::REQUIRED, 'The user ID')
     ->setCode(function (InputInterface $input, OutputInterface $output) use ($fleetRepository) {
-        $userId = $input->getArgument('userId');
-        $fleet = new Fleet($userId);
-        $fleetRepository->save($fleet);
-        $output->writeln($fleet->getId());
+        $handler = new CreateFleetHandler($fleetRepository, $output);
+        $handler->handle(new CreateFleetCommand(
+            $input->getArgument('userId'),
+        ));
     });
 
 $application->register('register-vehicle')
     ->addArgument('fleetId', InputArgument::REQUIRED, 'The fleet ID')
     ->addArgument('vehiclePlateNumber', InputArgument::REQUIRED, 'The vehicle plate number')
-    ->setCode(function (InputInterface $input, OutputInterface $output) use ($fleetRepository) {
-        $handler = new RegisterVehicleHandler($fleetRepository);
+    ->setCode(function (InputInterface $input, OutputInterface $output) use ($fleetRepository, $vehicleRepository) {
+        $handler = new RegisterVehicleHandler($fleetRepository, $vehicleRepository, $output);
         $handler->handle(new RegisterVehicleCommand(
             $input->getArgument('fleetId'),
             $input->getArgument('vehiclePlateNumber')
@@ -39,13 +48,14 @@ $application->register('register-vehicle')
     });
 
 $application->register('localize-vehicle')
+    ->addOption('ansi', null, InputOption::VALUE_NEGATABLE, 'Force/disable ANSI output')
     ->addArgument('fleetId', InputArgument::REQUIRED, 'The fleet ID')
     ->addArgument('vehiclePlateNumber', InputArgument::REQUIRED, 'The vehicle plate number')
     ->addArgument('lat', InputArgument::REQUIRED, 'Latitude')
     ->addArgument('lng', InputArgument::REQUIRED, 'Longitude')
     ->addArgument('alt', InputArgument::OPTIONAL, 'Altitude')
-    ->setCode(function (InputInterface $input, OutputInterface $output) use ($fleetRepository) {
-        $handler = new ParkVehicleHandler($fleetRepository);
+    ->setCode(function (InputInterface $input, OutputInterface $output) use ($locationRepository, $vehicleRepository) {
+        $handler = new ParkVehicleHandler($locationRepository, $vehicleRepository, $output);
         $handler->handle(new ParkVehicleCommand(
             $input->getArgument('fleetId'),
             $input->getArgument('vehiclePlateNumber'),

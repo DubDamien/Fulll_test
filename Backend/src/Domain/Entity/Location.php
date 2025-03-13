@@ -5,13 +5,13 @@ namespace Fulll\Domain\Entity;
 Class Location {
     private $id;
     private $lat;
-    private $long;
+    private $lng;
     private $alt;
 
-    public function __construct(float $lat, float $long, ?float $alt = null) {
-        $this->id = uniqid();
+    public function __construct(float $lat, float $lng, ?float $alt = null, ?string $id = null) {
+        $this->id = $id ?? uniqid();
         $this->lat = $lat;
-        $this->long = $long;
+        $this->lng = $lng;
         $this->alt = $alt;
     }
 
@@ -20,17 +20,22 @@ Class Location {
         return $this->id;
     }
 
+    public function setId($id): void
+    {
+        $this->id = $id;
+    }
+
     public function getlat(): float
     {
         return $this->lat;
     }
 
-    public function getLong(): float
+    public function getLng(): float
     {
-        return $this->long;
+        return $this->lng;
     }
 
-    public function getAlt(): float
+    public function getAlt(): ?float
     {
         return $this->alt;
     }
@@ -38,7 +43,7 @@ Class Location {
     public function sameThanPreviousLocation(Location $previousLocation)
     {
         return $this->lat === $previousLocation->lat &&
-        $this->long === $previousLocation->long &&
+        $this->lng === $previousLocation->lng &&
         $this->alt === $previousLocation->alt;
     }
 }

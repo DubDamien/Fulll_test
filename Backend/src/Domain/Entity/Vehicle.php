@@ -7,15 +7,20 @@ Class Vehicle {
     private $plateNumber;
     private ?Location $location = null;
 
-    public function __construct(string $plateNumber) 
+    public function __construct(string $plateNumber, ?string $id = null) 
     {
-        $this->id = uniqid();
+        $this->id = $id ?? uniqid();
         $this->plateNumber = $plateNumber;
     }
 
     public function getId(): string
     {
         return $this->id;
+    }
+
+    public function setId($id): void
+    {
+        $this->id = $id;
     }
 
     public function getPlateNumber(): string 
@@ -26,6 +31,11 @@ Class Vehicle {
     public function getLocation(): Location 
     {
         return $this->location;
+    }
+
+    public function setLocation(Location $location): void
+    {
+        $this->location = $location;
     }
 
     public function parkVehicle(Location $location): void

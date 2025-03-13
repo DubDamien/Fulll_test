@@ -7,8 +7,8 @@ Class Fleet {
     private $userId;
     private $vehicles = [];
 
-    public function __construct(string $userId) {
-        $this->id = uniqid();
+    public function __construct(string $userId, ?string $id = null) {
+        $this->id = $id ?? uniqid();
         $this->userId = $userId;
     }
 
@@ -17,12 +17,9 @@ Class Fleet {
         return $this->id;
     }
 
-    public function registerVehicle(Vehicle $vehicle): void 
+    public function setId($id): void
     {
-        if ($this->isVehicleRegistered($vehicle)) {
-            throw new \Exception("Vehicle already exist in the fleet");
-        }
-        $this->vehicles[] = $vehicle;
+        $this->id = $id;
     }
 
     public function isVehicleRegistered(Vehicle $vehicle): bool
@@ -35,14 +32,14 @@ Class Fleet {
         return $this->userId;
     }
 
-    public function getVehicleByPlateNumber(string $plateNumber): Vehicle
-    {
-        foreach ($this->vehicles as $vehicle) {
-            if ($vehicle->getPlateNumber() === $plateNumber) {
-                return $vehicle;
+    public function registerVehicle(Vehicle $vehicle) {
+        foreach ($this->vehicles as $existingVehicle) {
+            if ($existingVehicle->getPlateNumber() === $vehicle->getPlateNumber()) {
+                throw new \Exception('Vehicle already exist in the fleet');
             }
         }
-
-        throw new \Exception("Vehicle with plate number $plateNumber not found in this fleet.");
+    
+        $this->vehicles[] = $vehicle;
     }
+
 }
