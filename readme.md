@@ -1,4 +1,4 @@
-### Full techinical tete
+### Full techinical test
 
 You will find the configuration and execution commands in each section: Backend and Algo.
 
